@@ -1,4 +1,6 @@
 angular.module \d3-module-picker, <[]>
+  ..config <[$compileProvider]> ++ ($compileProvider) ->
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*blob:/)
   ..directive \ngselect2, -> do
     require: <[]>
     restrict: \A
@@ -26,12 +28,26 @@ angular.module \d3-module-picker, <[]>
           for val in (vals or []) => html += $("<option></option>").val(val).text(val).0.outerHTML
           $(e).html(html)
         if changed! => setTimeout (-> $(e).val(vals).trigger(\change) ),0
-  ..controller \d3-module-picker, <[$scope]> ++ ($scope) ->
+  ..controller \d3-module-picker, <[$scope $http]> ++ ($scope, $http) ->
     $scope.output = {}
+    $scope.urls = []
+    $scope.bundleURL = ""
     $scope.$watch 'modules', (list) -> 
       if !list => return
       list = list.map -> it.split \/
-      urls = list.map -> "https://d3js.org/d3-#{it.0}-#{it.1}.js"
+      urls = $scope.urls = list.map -> "https://d3js.org/#{it.0}.v#{it.1}.js"
       $scope.output.html = urls.map(-> "<script src=\"#it\"></script>").join(\\n)
       $scope.output.jade = urls.map(-> "script(src=\"#it\")").join(\\n)
       $scope.output.npm = "npm install " + list.map(->"#{it.0}@#{it.1}").join(' ')
+    $scope.fetch = (url) -> new Promise (res, rej) ->
+      $http { url: url, method: \GET }
+        .success (d) -> res d
+        .error (d) -> rej!
+    $scope.loading = false
+    $scope.make-bundle = ->
+      $scope.loading = true
+      promises = $scope.urls.map -> $scope.fetch it
+      Promise.all promises
+        .then (data) -> $scope.$apply ->
+          $scope.bundleURL = URL.createObjectURL new Blob [data.join(\\n)], {type: \text/javascript}
+          $scope.loading = false

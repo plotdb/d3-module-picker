@@ -11,6 +11,11 @@ body {
 #module-selector {
   width: 100%;
 }
+.input-group .select2-selection.select2-selection--multiple {
+  border-radius: 3px 0 0 3px;
+  height: 34px;
+  border: 1px solid #ccc;
+}
 .select2-dropdown.select2-dropdown--below {
   margin-top: 20px;
 }

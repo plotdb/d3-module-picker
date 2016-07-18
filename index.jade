@@ -27,6 +27,7 @@ html(lang="en")
     // custom files
     link(rel="stylesheet",type="text/css",href="index.css")
     link(rel="stylesheet",type="text/css",href="lib/select2/4.0.1/css/select2.min.css")
+    script(type="text/javascript",src="assets/bluebird/3.4.1/bluebird.min.js")
     script(type="text/javascript",src="index.js")
     script(type="text/javascript",src="lib/select2/4.0.1/js/select2.min.js")
   body(ng-app="d3-module-picker",ng-controller="d3-module-picker")
@@ -34,8 +35,15 @@ html(lang="en")
       h2 D3 4.0 Module Picker
       p Wanna make your own bundle of d3 module collection?
       hr
-      select#module-selector(multiple="multiple",ngselect2,ng-data="modules")
-        include d3module.jade
+      .input-group
+        select#module-selector(multiple="multiple",ngselect2,ng-data="modules")
+          include d3module.jade
+        span.input-group-btn(ng-click="makeBundle()")
+          .btn.btn-default Make Bundle
+      hr
+      .text-right
+        img(src="loading.gif",ng-show="loading",style="height:32px;")
+        a(ng-show="!loading && bundleURL",ng-attr-href="{{bundleURL}}",download="bundle.js") Download Bundle
       hr
       p Here is your html code:
       .row
